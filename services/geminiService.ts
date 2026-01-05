@@ -1,37 +1,26 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { NewsCategory, FetchNewsResponse } from "../types";
 
-// Initialize Gemini Client
-// NOTE: Ideally, the key should be in a secure backend for production.
-// For this SPA demo, we use the environment variable directly.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const MODEL_NAME = 'gemini-3-flash-preview';
 
 export const fetchAndRewriteNews = async (category: NewsCategory): Promise<FetchNewsResponse> => {
   try {
-    const model = 'gemini-3-flash-preview'; 
-
-    // We use Gemini's Google Search grounding to find the news AND the generative capabilities
-    // to rewrite it in one go. This avoids needing a separate NewsAPI subscription.
     const prompt = `
-      Actúa como un periodista experto de "Mundo AI News".
+      Actúa como editor jefe de un diario minimalista.
+      1. Busca noticias actuales (última hora) sobre: "${category}".
+      2. Selecciona 4 historias distintas.
+      3. Escribe un resumen breve (máx 30 palabras) informativo y directo.
+      4. Define una keyword en inglés para la imagen.
       
-      TAREA:
-      1. Busca las noticias más importantes y recientes sobre: "${category}".
-      2. Selecciona las 6 historias más impactantes de las últimas 24 horas.
-      3. Para cada historia, escribe un resumen ORIGINAL y atractivo en español. 
-         - El resumen debe ser único para evitar plagio.
-         - Usa un tono profesional pero accesible.
-         - Máximo 40 palabras por resumen.
-      4. Proporciona una "keyword" (palabra clave) en inglés para buscar una imagen relacionada.
-      
-      Devuelve la respuesta estrictamente en formato JSON.
+      Output JSON.
     `;
 
     const response = await ai.models.generateContent({
-      model: model,
+      model: MODEL_NAME,
       contents: prompt,
       config: {
-        tools: [{ googleSearch: {} }], // Enable Search Grounding
+        tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -47,7 +36,7 @@ export const fetchAndRewriteNews = async (category: NewsCategory): Promise<Fetch
                   source: { type: Type.STRING },
                   publishedTime: { type: Type.STRING },
                   imageKeyword: { type: Type.STRING },
-                  url: { type: Type.STRING, description: "Link to the source if found" }
+                  url: { type: Type.STRING }
                 },
                 required: ["title", "summary", "category", "source", "publishedTime", "imageKeyword"]
               }
@@ -58,26 +47,39 @@ export const fetchAndRewriteNews = async (category: NewsCategory): Promise<Fetch
     });
 
     if (response.text) {
-      const data = JSON.parse(response.text) as FetchNewsResponse;
-      return data;
+      return JSON.parse(response.text) as FetchNewsResponse;
     }
-    
-    throw new Error("No data returned from Gemini");
-
+    throw new Error("Empty response");
   } catch (error) {
-    console.error("Error fetching news with Gemini:", error);
-    // Fallback data in case of API failure or quota limits
-    return {
-      articles: [
-        {
-          title: "Servicio de Noticias No Disponible",
-          summary: "No pudimos conectar con la red neuronal de noticias en este momento. Por favor verifica tu API Key o intenta más tarde.",
-          category: category,
-          source: "Sistema",
-          publishedTime: "Ahora",
-          imageKeyword: "error"
-        }
-      ]
-    };
+    console.error("News fetch error:", error);
+    return { articles: [] };
+  }
+};
+
+export const generateDeepDive = async (title: string, contextSummary: string): Promise<string> => {
+  try {
+    const prompt = `
+      Escribe un artículo periodístico detallado y profundo (aprox. 300 palabras) sobre esta noticia: "${title}".
+      Contexto inicial: "${contextSummary}".
+      
+      Estilo:
+      - Periodismo de datos serio y objetivo.
+      - Estructurado en 3 párrafos.
+      - Usa formato Markdown para subtítulos o negritas si es necesario.
+      - NO inventes datos, usa tu conocimiento general y razonamiento.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        // We allow the model to think/reason for better quality writing
+        thinkingConfig: { thinkingBudget: 1024 } 
+      }
+    });
+
+    return response.text || "No se pudo generar el análisis.";
+  } catch (error) {
+    return "Error al generar el análisis profundo. Intente nuevamente.";
   }
 };

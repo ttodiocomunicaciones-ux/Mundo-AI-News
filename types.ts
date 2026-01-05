@@ -1,11 +1,14 @@
 export interface NewsArticle {
+  id: string; // Unique ID for filtering
   title: string;
   summary: string;
   category: string;
   source: string;
   publishedTime: string;
-  imageKeyword: string; // Used to fetch a relevant placeholder if real image fails
+  imageKeyword: string;
   url?: string;
+  timestamp: number; // Unix timestamp when it was fetched
+  fullAnalysis?: string; // Optional field for the detailed report
 }
 
 export enum NewsCategory {
@@ -14,9 +17,9 @@ export enum NewsCategory {
   BUSINESS = 'Negocios',
   SCIENCE = 'Ciencia',
   SPORTS = 'Deportes',
-  ENTERTAINMENT = 'Entretenimiento'
+  ENTERTAINMENT = 'Cultura'
 }
 
 export interface FetchNewsResponse {
-  articles: NewsArticle[];
+  articles: Omit<NewsArticle, 'id' | 'timestamp' | 'fullAnalysis'>[];
 }
