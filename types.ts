@@ -9,6 +9,7 @@ export interface NewsArticle {
   url?: string;
   timestamp: number; // Unix timestamp when it was fetched
   fullAnalysis?: string; // Optional field for the detailed report
+  generatedImage?: string; // Base64 encoded generated image
 }
 
 export enum NewsCategory {
@@ -21,5 +22,5 @@ export enum NewsCategory {
 }
 
 export interface FetchNewsResponse {
-  articles: Omit<NewsArticle, 'id' | 'timestamp' | 'fullAnalysis'>[];
+  articles: Omit<NewsArticle, 'id' | 'timestamp' | 'fullAnalysis' | 'generatedImage'>[];
 }

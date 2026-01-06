@@ -44,7 +44,8 @@ const App: React.FC = () => {
         ...a,
         id: `${Date.now()}-${i}`,
         timestamp: Date.now(),
-        fullAnalysis: undefined
+        fullAnalysis: undefined,
+        generatedImage: undefined
       }));
 
       setHistory(prev => {
@@ -97,6 +98,10 @@ const App: React.FC = () => {
     setLoadingModal(false);
   };
 
+  const handleImageGenerated = (id: string, imageData: string) => {
+    setHistory(prev => prev.map(a => a.id === id ? { ...a, generatedImage: imageData } : a));
+  };
+
   // Filter Logic
   const oneHourAgo = Date.now() - 3600000;
   
@@ -107,9 +112,6 @@ const App: React.FC = () => {
     if (!matchesCategory) return false;
     return timeFilter === 'latest' ? isLatest : !isLatest;
   });
-
-  // If we show "latest" but have no new data (and loading finished), maybe show past data or a message?
-  // For simplicity, we just show the list.
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-gray-200">
@@ -176,6 +178,7 @@ const App: React.FC = () => {
                     key={article.id} 
                     article={article} 
                     onAnalyze={handleAnalyze}
+                    onImageGenerated={handleImageGenerated}
                   />
                 ))}
               </div>

@@ -3,21 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mundo AI News</title>
+    <title>Mundo.AI | Inteligencia Editorial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
-              serif: ['Merriweather', 'serif'],
-            },
-            colors: {
-              primary: '#2563EB',
-              secondary: '#1E293B',
-              accent: '#F59E0B',
+              serif: ['Playfair Display', 'serif'],
+              mono: ['JetBrains Mono', 'monospace'],
             }
           }
         }
@@ -25,12 +21,15 @@
     </script>
     <style>
       body {
-        background-color: #f3f4f6;
+        background-color: #ffffff;
+        color: #1a1a1a;
       }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
     </style>
   <script type="importmap">
